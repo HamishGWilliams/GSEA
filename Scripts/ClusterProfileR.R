@@ -31,20 +31,20 @@ check_packages_ClusterProfileR <- function(pkg_list) {
 }
 
 ## Install ClusterProfiler: !! Unhash as needed !!
-# if (!require("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("clusterProfiler")
-
-# if (!require("BiocManager", quietly = TRUE))
-#   install.packages("BiocManager")
-# 
-# BiocManager::install("AnnotationForge")
-
-# if (!require("BiocManager", quietly = TRUE))
+#if (!require("BiocManager", quietly = TRUE))
 #  install.packages("BiocManager")
-# 
-# BiocManager::install("enrichplot", force = TRUE)
+#
+#BiocManager::install("clusterProfiler")
+
+#if (!require("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
+#
+#BiocManager::install("AnnotationForge")
+#
+#if (!require("BiocManager", quietly = TRUE))
+# install.packages("BiocManager")
+#
+#BiocManager::install("enrichplot", force = TRUE)
 
 # Create list of packages needed:
 pkg_list_ClusterProfileR<-c("tidyverse", 
@@ -72,22 +72,32 @@ browseVignettes("AnnotationForge")
 ## 2. Importing Data ----
 # Import GO term file:
 {
-DEG_GO_Terms <- read.table("ClusterProfiler/DEG_GO_terms.txt", 
+DEG_GO_Terms <- read.table("Data/Attempt 1/DEG_GO_terms.txt", 
                            header = T, 
                            sep = '\t', 
                            stringsAsFactors = FALSE)
 
-genome_GO_Terms <- read.table("ClusterProfiler/genome_GO_terms.txt", 
+# Set the path to the zip file
+zip_file <- "Data/Attempt 1/genome_GO_terms.zip"
+
+# Specify the destination directory where you want to extract the contents
+destination_dir <- "Data/Attempt 1/"
+
+# Unzip the file
+unzip(zipfile = zip_file, exdir = destination_dir)
+
+
+genome_GO_Terms <- read.table("Data/Attempt 1/genome_GO_terms.txt", 
                            header = T, 
                            sep = '\t', 
                            stringsAsFactors = FALSE)
 
-DEG_BP_MF_GO_Terms <- read.table("ClusterProfiler/DEG_BP_MF_GOs.txt", 
+DEG_BP_MF_GO_Terms <- read.table("Data/Attempt 1/DEG_BP_MF_GOs.txt", 
                            header = T, 
                            sep = '\t', 
                            stringsAsFactors = FALSE)
 
-genome_BP_MF_GO_Terms <- read.table("ClusterProfiler/genome_BP_MF_merged.txt",
+genome_BP_MF_GO_Terms <- read.table("Data/Attempt 1/genome_BP_MF_merged.txt",
                               header = T, 
                               sep = '\t', 
                               stringsAsFactors = FALSE)
@@ -95,12 +105,21 @@ genome_BP_MF_GO_Terms <- read.table("ClusterProfiler/genome_BP_MF_merged.txt",
 
 # Import blastp file:
 {
-DEG_matching_file <- read.table("ClusterProfiler/DEG_matching_file.txt", 
+DEG_matching_file <- read.table("Data/Attempt 1/DEG_matching_file.txt", 
                                 header = F, 
                                 sep = '\t', 
                                 stringsAsFactors = FALSE)
+  
+# Set the path to the zip file
+zip_file <- "Data/Attempt 1/genome_matching_file.zip"
 
-genome_matching_file <- read.table("ClusterProfiler/genome_matching_file.txt", 
+# Specify the destination directory where you want to extract the contents
+destination_dir <- "Data/Attempt 1/"
+
+# Unzip the file
+unzip(zipfile = zip_file, exdir = destination_dir)
+
+genome_matching_file <- read.table("Data/Attempt 1/genome_matching_file.txt", 
                                 header = F, 
                                 sep = '\t', 
                                 stringsAsFactors = FALSE)
