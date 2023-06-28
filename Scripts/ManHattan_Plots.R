@@ -86,6 +86,10 @@ manhattan(gwasResults, annotatePval = 0.01)
 # different samples. How to select which start and end BP locations
 # should be used for each gene is not clear. Will need to decide on a method
 # to tackle this issue.
+    # I will likely need to simply extract the very first value from each 
+    # data point, as trying to average any of the values will simply lead
+    # to the possibility of overlap of gene locations, which may cause issues
+    # later down the line in terms of analyses.
 
 # The other issue with this variable is whether to take the start or end
 # number as the BP variable data for the Manhattan data frame object.
@@ -94,4 +98,172 @@ manhattan(gwasResults, annotatePval = 0.01)
 # number for the gene BP location is likely to be the best value of the two
 # to take for this variable column.
 
+## Separating the lowest value start locations for each gene ----
 
+# create filename
+filename <- "Data/Attempt 2/A_Equina_Counts.txt"
+
+# read in data
+data <- read.table(filename, sep="\t", header = TRUE)
+
+# Extract only the smallest value of the "Start" column
+data$Start <- sapply(strsplit(as.character(data$Start), ";"), function(x) {
+  x <- as.numeric(x)
+  x <- unique(x)  # Remove duplicates
+  min_val <- min(x)
+  x <- x[x <= min_val]
+  paste(x, collapse = ";")  # Combine remaining values with a semicolon delimiter
+})
+
+# Subset data to only include gene name and start columns
+data_subset <- subset(data[, c(1,3)])
+
+# Remove original Data file
+rm(data)
+
+## Currently, the Names of the gene IDs do not match the other datafile,
+## so we need to make them the same:
+
+# Remove the ".TU" component of names:
+# Check if the 'Geneid' column exists in the data frame
+  # if ("Geneid" %in% colnames(data_subset)) {
+  #   # Replacing ".TU" with "." in the "Geneid" column
+  #   data_subset$Geneid <- gsub("\\.TU", ".", data_subset$Geneid)
+  #   
+  #   # Replacing "path" with "mrna" in the "Geneid" column
+  #   data_subset$Geneid <- gsub("path", "mrna", data_subset$Geneid)
+  # }
+
+# Rename the "data_subset" file to an appropriate name:
+bp_locations <- data_subset
+rm(data_subset)
+
+## Import DESeq2 results: ----
+filename <- "Data/Attempt 2/DEresultsshort.csv"
+data <- read.table(filename, sep=",", header = TRUE)
+
+# rename first row
+colnames(data)
+names(data)[names(data) == "X"] <- "Geneid"
+names(data)[names(data) == "log2FoldChange"] <- "LFC"
+colnames(data)
+
+# subset only relevant columns:
+data_subset <- subset(data[, c(1,3,6,7)])
+colnames(data_subset)
+rm(data)
+# rename data frame:
+DESeq_results <- data_subset
+rm(data_subset)
+
+# Merging datafiles:
+head(DESeq_results)
+head(bp_locations)
+
+merged_files <- merge(DESeq_results, bp_locations, by = "Geneid")
+colnames(merged_files)
+names(merged_files)[names(merged_files) == "Start"] <- "bp"
+colnames(merged_files)
+
+# Change properties of variables:
+str(merged_files)
+merged_files$bp <- as.numeric(merged_files$bp)
+
+## Manhattan Plot----
+manhattan(merged_files, bp="bp", snp="Geneid", p="LFC", logp = FALSE)
+
+manhplot <- ggplot(merged_files, aes(x = bp, y = LFC))
+print(manhplot)
+
+plot(merged_files$bp, merged_files$padj)                                  
+
+library(tidyverse)
+library(ggplot2)
+
+# First plot:
+  # LFC~BP, coloured with Padj
+ggplot(merged_files, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+    ## Too much noise, removing NA padj values
+NA_rm_merged_files <- merged_files[complete.cases(merged_files),]
+
+# 2nd plot
+  # removed NA values
+
+ggplot(NA_rm_merged_files, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+    ## A lot of non-significant values, removing them...
+
+sig_only_merged_files <- subset(merged_files[merged_files$padj < 0.1,])
+sig_only_merged_files <- sig_only_merged_files[complete.cases(sig_only_merged_files),]
+
+# 3rd Plot
+  # Removing padj < 0.1...
+
+ggplot(sig_only_merged_files, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+
+ggplot(merged_files, aes(x = bp, y = -log10(pvalue), color = LFC)) +
+  geom_point(aes(color = ifelse(LFC > 1 | LFC < -1, "Upregulated", "Down-Regulated")), size = 2) +
+  scale_color_manual(values = c("Down-Regulated" = "blue", "Upregulated" = "red")) +
+  labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
+  theme_minimal()
+
+
+
+ggplot(sig_only_merged_files, aes(x = bp, y = -log10(pvalue), color = LFC)) +
+  geom_point(aes(color = ifelse(LFC > 1 | LFC < -1, "Upregulated", "Down-Regulated")), size = 2) +
+  scale_color_manual(values = c("Down-Regulated" = "blue", "Upregulated" = "red")) +
+  labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
+  theme_minimal()
+
+
+ggplot(merged_files, aes(x = bp, y = -log10(pvalue))) +
+  geom_point(size = 2) +
+  labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
+  theme_minimal()
+
+ggplot(merged_files, aes(x = bp, y = -log10(padj))) +
+  geom_point(size = 2) +
+  labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
+  theme_minimal()
+
+install.packages("ggrepel")
+library(ggrepel)
+
+GOI_Short <- read.csv("Data/Attempt 2/GOI_Short.csv", header = FALSE)
+GOI_Short <- GOI_Short[-1,]
+
+highlited_names <- GOI_Short
+names <- merged_files$Geneid
+df <- data.frame(names = names)
+df$highlight <- ifelse(df$names %in% highlited_names, "DEGs", "Normal")
+
+ggplot(merged_files, aes(x = bp, y = -log10(pvalue))) +
+  geom_point(aes(color = ifelse(Geneid %in% highlited_names, "DEGs", "Normal")), size = 2) +
+  labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
+  theme_minimal()

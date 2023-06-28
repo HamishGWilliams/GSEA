@@ -282,7 +282,7 @@ merged_df <- merged_df[!duplicated(merged_df), ]
 
 ## 4. Import DE results ----
 # Import DE results for the short experiment:
-DE_results <- read.table("ClusterProfiler/DE_results_names.txt", 
+DE_results <- read.table("Data/Attempt 1/DE_results_names.txt", 
                          header = T, 
                          sep = '\t', 
                          stringsAsFactors = TRUE)
