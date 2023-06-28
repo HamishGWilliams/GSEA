@@ -192,6 +192,11 @@ ggplot(merged_files, aes(x = bp, y = LFC, color = padj)) +
   geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
   geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
 
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_1st.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_1st.svg")
+dev.off()
+
     ## Too much noise, removing NA padj values
 NA_rm_merged_files <- merged_files[complete.cases(merged_files),]
 
@@ -207,6 +212,11 @@ ggplot(NA_rm_merged_files, aes(x = bp, y = LFC, color = padj)) +
   theme_minimal() +
   geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
   geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_2nd.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_2nd.svg")
+dev.off()
 
     ## A lot of non-significant values, removing them...
 
@@ -225,6 +235,11 @@ ggplot(sig_only_merged_files, aes(x = bp, y = LFC, color = padj)) +
   theme_minimal() +
   geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
   geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_3rd.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_3rd.svg")
+dev.off()
 
 
 ggplot(merged_files, aes(x = bp, y = -log10(pvalue), color = LFC)) +
@@ -263,7 +278,7 @@ names <- merged_files$Geneid
 df <- data.frame(names = names)
 df$highlight <- ifelse(df$names %in% highlited_names, "DEGs", "Normal")
 
-ggplot(merged_files, aes(x = bp, y = -log10(pvalue))) +
+ggplot(merged_files, aes(x = bp, y = -log10(padj))) +
   geom_point(aes(color = ifelse(Geneid %in% highlited_names, "DEGs", "Normal")), size = 2) +
   labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
   theme_minimal()
