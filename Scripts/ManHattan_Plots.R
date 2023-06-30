@@ -210,14 +210,16 @@ library(plotly)
 # First plot:
   # LFC~BP, coloured with Padj - SHORT
 ggplot(merged_files, aes(x = bp, y = LFC, color = padj)) +
-  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "orange")) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 4) +
+  scale_color_manual(values = c("Non-Significant" = "darkgray", "Significant" = "orange")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 
 dev.copy(png, file = "Results/Iteration 2/LFC_BP_Short_1st.png")
 dev.off()
@@ -226,14 +228,16 @@ dev.off()
 
 # LFC~BP, coloured with Padj - LONG
 ggplot(merged_files_long, aes(x = bp, y = LFC, color = padj)) +
-  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "purple")) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 4) +
+  scale_color_manual(values = c("Non-Significant" = "darkgray", "Significant" = "purple")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 
 dev.copy(png, file = "Results/Iteration 2/LFC_BP_Long_1st.png")
 dev.off()
@@ -249,15 +253,16 @@ NA_rm_merged_files_long <- merged_files_long[complete.cases(merged_files_long),]
   # removed NA values - SHORT
 
 ggplot(NA_rm_merged_files, aes(x = bp, y = LFC, color = padj)) +
-  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "orange")) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 4) +
+  scale_color_manual(values = c("Non-Significant" = "darkgrey", "Significant" = "orange")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
-
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 dev.copy(png, file = "Results/Iteration 2/LFC_BP_Short_2nd.png")
 dev.off()
 dev.copy(svg, file = "Results/Iteration 2/LFC_BP_Short_2nd.svg")
@@ -266,14 +271,16 @@ dev.off()
 # removed NA values - LONG
 
 ggplot(NA_rm_merged_files_long, aes(x = bp, y = LFC, color = padj)) +
-  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "purple")) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 4) +
+  scale_color_manual(values = c("Non-Significant" = "darkgrey", "Significant" = "purple")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 
 dev.copy(png, file = "Results/Iteration 2/LFC_BP_Long_2nd.png")
 dev.off()
@@ -294,14 +301,16 @@ count(unique(merged_files_long[merged_files_long$padj < 0.1,]))
   # Removing padj < 0.1... - SHORT
 
 ggplot(sig_only_merged_files, aes(x = bp, y = LFC, color = padj)) +
-  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "orange")) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 4) +
+  scale_color_manual(values = c("Non-Significant" = "darkgrey", "Significant" = "orange")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 
 dev.copy(png, file = "Results/Iteration 2/LFC_BP_Short_3rd.png")
 dev.off()
@@ -311,14 +320,16 @@ dev.off()
 # Removing padj < 0.1... - LONG
 
 ggplot(sig_only_merged_files_long, aes(x = bp, y = LFC, color = padj)) +
-  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "purple")) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 4) +
+  scale_color_manual(values = c("Non-Significant" = "darkgrey", "Significant" = "purple")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 
 dev.copy(png, file = "Results/Iteration 2/LFC_BP_Long_3rd.png")
 dev.off()
@@ -335,16 +346,23 @@ ggplot() +
              aes(x = bp, y = LFC, color = "Long"),
              size = 4) +
   scale_color_manual(values = c("Long" = "purple", "Short" = "orange")) +
-  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Experiment") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
   theme_minimal() +
-  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
+
+dev.copy(png, file = "Results/Iteration 2/Combined_plot.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/Combined_plot.svg")
+dev.off()
 
       ## Interactable version
 
-Figure_3 <- ggplot() +
+Figure_3 <- ggplot(data = sig_only_merged_files, aes(text = paste("Gene:", Geneid))) +
                 geom_point(data = sig_only_merged_files, 
                            aes(x = bp, y = LFC, color = "Short"),
                            size = 4) +
@@ -356,8 +374,10 @@ Figure_3 <- ggplot() +
                 scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
                 scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
                 theme_minimal() +
-                geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
-                geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed",
+             linewidth = 1.5) +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed",
+             linewidth = 1.5)
 
 Figure_3 <- ggplotly(Figure_3)
 print(Figure_3)
