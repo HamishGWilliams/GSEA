@@ -211,10 +211,8 @@ names(merged_df)[names(merged_df) == "V1"] <- "GENE"
     names(TERMs_DEG_MF)[names(TERMs_DEG_MF) == "GO:MF"] <- "GENENAMES_MF"
 
 ## Extract DEGs list:
-z <- merged_df[,1]
-z <- unique(z)
-DEGs <- z
-        
+DEGs <- merged_df[,1]
+DEGs <- unique(DEGs)
 
 ## 4. Merge GENOME files ----
 
@@ -280,6 +278,24 @@ merged_df <- merged_df[!duplicated(merged_df), ]
     TERMs_GENOME_MF <- TERMs_GENOME_MF[!duplicated(TERMs_GENOME_MF), ]
     names(TERMs_GENOME_MF)[names(TERMs_GENOME_MF) == "GO:MF"] <- "GENENAMES_MF"
 
+# Tidy up environment..
+    rm(genome_matching_file, 
+       DEG_matching_file, 
+       DEG_BP_MF_GO_Terms, 
+       genome_BP_MF_GO_Terms,
+       merged_df,
+       DEG_GO_Terms,
+       genome_GO_Terms,
+       destination_dir,
+       filename,
+       zip_file,
+       bracketed_rows,
+       aGENOME,
+       DEG_BP,
+       DEG_MF,
+       aGENOME_BP,
+       aGENOME_MF)
+    
 ## 4. Import DE results ----
 # Import DE results for the short experiment:
 DE_results <- read.table("Data/Attempt 1/DE_results_names.txt", 
@@ -316,6 +332,10 @@ yBP@result
 DEG_BP_results <- yBP@result
 DEG_BP_results
 
+## Subset the results to only include those with p.adjust < 0.1...
+yBP_subset <- subset(DEG_BP_results[DEG_BP_results$p.adjust < 0.1,])
+yBP_subset
+
 yMF <- enricher(DEGs, 
                 TERM2GENE = GENEs_GENOME_MF,
                 TERM2NAME = TERMs_GENOME_MF,
@@ -345,12 +365,62 @@ GENOME_MF_results <- xMF@result
 ?dropGO
 ?GSEA
 ?enricher
+library(enrichplot)
+library(cowplot)
 
 enrichplot::dotplot(yMF) + ggtitle("Molecular Function") +
   enrichplot::dotplot(yBP) + ggtitle("Biological Processes")
 
+# Create dot plot for molecular function
+dotplot_MF <- enrichplot::dotplot(yMF) + ggtitle("Molecular Function")
+plot(dotplot_MF)
+
+dev.copy(png, file = "Results/Iteration 2/ORA_MF_Short.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/ORA_MF_Short.png")
+dev.off()
+
+# Create dot plot for biological processes
+colnames(yBP_subset)
+str(yBP_subset)
+yBP_subset$GeneRatio <- as.character(yBP_subset$GeneRatio)
+
+# Function to convert fraction to numeric
+convertFractionToNumeric <- function(fraction) {
+  fraction_parts <- strsplit(fraction, "/")[[1]]
+  numerator <- as.numeric(fraction_parts[1])
+  denominator <- as.numeric(fraction_parts[2])
+  numeric_value <- numerator / denominator
+  return(numeric_value)
+}
+
+# Convert fraction variable to numeric
+yBP_subset$GeneRatio <- sapply(yBP_subset$GeneRatio, convertFractionToNumeric)
+yBP_subset$BgRatio <- sapply(yBP_subset$BgRatio, convertFractionToNumeric)
+
+# Sort the dataframe by the 'Values' column in ascending order
+sorted_df <- yBP_subset[order(yBP_subset$p.adjust), ]
+
+# Subset the dataframe with the lowest 10 values
+subset_df <- sorted_df[1:10, ]
+
+ggplot(data = subset_df, aes(y = Description, x = GeneRatio, color = p.adjust)) + 
+  geom_point(aes(size = Count), stroke = 3) +
+  labs(title = "Biological Processes")+
+  theme_light()
+
+dev.copy(png, file = "Results/Iteration 2/ORA_BP_Short.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/ORA_BP_Short.png")
+dev.off()
+
 enrichplot::dotplot(xMF) + ggtitle("Molecular Function") +
   enrichplot::dotplot(xBP) + ggtitle("Biological Processes")
+
+dev.copy(png, file = "Results/Iteration 2/GSEA_Short.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/GSEA_Short.png")
+dev.off()
 
 
   # works by dropping GO terms based on specificity on hierarchy

@@ -169,22 +169,49 @@ colnames(merged_files)
 str(merged_files)
 merged_files$bp <- as.numeric(merged_files$bp)
 
+
+    ## Repeat for long experiment
+
+filename <- "Data/Attempt 2/DEresultslong.csv"
+data <- read.table(filename, sep=",", header = TRUE)
+
+# rename first row
+colnames(data)
+names(data)[names(data) == "X"] <- "Geneid"
+names(data)[names(data) == "log2FoldChange"] <- "LFC"
+colnames(data)
+
+# subset only relevant columns:
+data_subset <- subset(data[, c(1,3,6,7)])
+colnames(data_subset)
+rm(data)
+# rename data frame:
+DESeq_results_long <- data_subset
+rm(data_subset)
+
+# Merging datafiles:
+head(DESeq_results_long)
+head(bp_locations)
+
+merged_files_long <- merge(DESeq_results_long, bp_locations, by = "Geneid")
+colnames(merged_files_long)
+names(merged_files_long)[names(merged_files_long) == "Start"] <- "bp"
+colnames(merged_files_long)
+
+# Change properties of variables:
+str(merged_files_long)
+merged_files_long$bp <- as.numeric(merged_files_long$bp)
+
 ## Manhattan Plot----
-manhattan(merged_files, bp="bp", snp="Geneid", p="LFC", logp = FALSE)
-
-manhplot <- ggplot(merged_files, aes(x = bp, y = LFC))
-print(manhplot)
-
-plot(merged_files$bp, merged_files$padj)                                  
-
 library(tidyverse)
 library(ggplot2)
+library(plotly)
 
 # First plot:
-  # LFC~BP, coloured with Padj
+  # LFC~BP, coloured with Padj - SHORT
 ggplot(merged_files, aes(x = bp, y = LFC, color = padj)) +
   geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
+  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "orange")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
@@ -192,20 +219,38 @@ ggplot(merged_files, aes(x = bp, y = LFC, color = padj)) +
   geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
   geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
 
-dev.copy(png, file = "Results/Iteration 2/LFC_BP_1st.png")
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_Short_1st.png")
 dev.off()
-dev.copy(svg, file = "Results/Iteration 2/LFC_BP_1st.svg")
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_Short_1st.svg")
 dev.off()
+
+# LFC~BP, coloured with Padj - LONG
+ggplot(merged_files_long, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "purple")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_Long_1st.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_Long_1st.svg")
+dev.off()
+
 
     ## Too much noise, removing NA padj values
 NA_rm_merged_files <- merged_files[complete.cases(merged_files),]
+NA_rm_merged_files_long <- merged_files_long[complete.cases(merged_files_long),]
 
 # 2nd plot
-  # removed NA values
+  # removed NA values - SHORT
 
 ggplot(NA_rm_merged_files, aes(x = bp, y = LFC, color = padj)) +
   geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
-  scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
+  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "orange")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
   scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
   scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
@@ -213,20 +258,183 @@ ggplot(NA_rm_merged_files, aes(x = bp, y = LFC, color = padj)) +
   geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
   geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
 
-dev.copy(png, file = "Results/Iteration 2/LFC_BP_2nd.png")
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_Short_2nd.png")
 dev.off()
-dev.copy(svg, file = "Results/Iteration 2/LFC_BP_2nd.svg")
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_Short_2nd.svg")
+dev.off()
+
+# removed NA values - LONG
+
+ggplot(NA_rm_merged_files_long, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "purple")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_Long_2nd.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_Long_2nd.svg")
 dev.off()
 
     ## A lot of non-significant values, removing them...
 
 sig_only_merged_files <- subset(merged_files[merged_files$padj < 0.1,])
 sig_only_merged_files <- sig_only_merged_files[complete.cases(sig_only_merged_files),]
+count(unique(merged_files[merged_files$padj < 0.1,]))
+
+sig_only_merged_files_long <- subset(merged_files_long[merged_files_long$padj < 0.1,])
+sig_only_merged_files_long <- sig_only_merged_files_long[complete.cases(sig_only_merged_files_long),]
+count(unique(merged_files_long[merged_files_long$padj < 0.1,]))
 
 # 3rd Plot
-  # Removing padj < 0.1...
+  # Removing padj < 0.1... - SHORT
 
 ggplot(sig_only_merged_files, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "orange")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_Short_3rd.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_Short_3rd.svg")
+dev.off()
+
+# Removing padj < 0.1... - LONG
+
+ggplot(sig_only_merged_files_long, aes(x = bp, y = LFC, color = padj)) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "black", "Significant" = "purple")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+dev.copy(png, file = "Results/Iteration 2/LFC_BP_Long_3rd.png")
+dev.off()
+dev.copy(svg, file = "Results/Iteration 2/LFC_BP_SLong_3rd.svg")
+dev.off()
+
+## Combined short + Long
+
+ggplot() +
+  geom_point(data = sig_only_merged_files, 
+             aes(x = bp, y = LFC, color = "Short"),
+             size = 4) +
+  geom_point(data = sig_only_merged_files_long, 
+             aes(x = bp, y = LFC, color = "Long"),
+             size = 4) +
+  scale_color_manual(values = c("Long" = "purple", "Short" = "orange")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+      ## Interactable version
+
+Figure_3 <- ggplot() +
+                geom_point(data = sig_only_merged_files, 
+                           aes(x = bp, y = LFC, color = "Short"),
+                           size = 4) +
+                geom_point(data = sig_only_merged_files_long, 
+                           aes(x = bp, y = LFC, color = "Long"),
+                           size = 4) +
+                scale_color_manual(values = c("Long" = "purple", "Short" = "orange")) +
+                labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+                scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+                scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+                theme_minimal() +
+                geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+                geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+Figure_3 <- ggplotly(Figure_3)
+print(Figure_3)
+
+
+## Adding on GOs to each data point of plot ----
+
+# To add on the descriptions of the gene ontologies for each gene, we
+# need a combined dataframe which includes a description for the GOs in a 
+# separate column.
+
+# Do we already have a data frame in our arsenal to do this? First we need to
+# understand where our data has come from, which blastp analyses was performed
+# on it, that way we can determine which GSEA results we should use to 
+# add the descriptions of the gene ontologies to the plot.
+
+# for the "merged_files" dataframe, this was constructed by combining the 
+# DESeq_results file and the bp_locations file. The BP_locations file has not
+# had any analyses performed on it, it is simply an extract of the gene positions
+# The DESeq_results is the full list of results of the Differential Expression
+# Analyses for the SHORT experiment performed. 
+
+# Neither of these datasets contain Gene Ontology Data, so therefore cannot 
+# already be prescribed the Descriptions of the GOs. Therefore, the first logical
+# step is to determine what blastp results we should use to attribute the 
+# GOs for each gene. 
+
+# The blastp performed was that containing both SWISS-Prot and cnidarian TREMBL
+# data (as of current, I am running a new analyses with only cnidarian TREMBL
+# data). The top 10 hits for each blastp hit were taken, exported to UNIPROT
+# to find their GO's, then imported back to UNIX to combine the files, which 
+# gave a file which contained combined GO and gene data.
+
+  ## Try to combine the GOs from the Genome Data...
+merged_genome_GOs <- merge(GENEs_GENOME_BP, TERMs_GENOME_BP, by = "GO")
+
+  ## With this now merged dataframe, try to merge GENEs from this 
+  ## dataframe to those in the merged_files dataframe.
+colnames(merged_genome_GOs)
+names(merged_genome_GOs)[names(merged_genome_GOs) == "GENE"] <- "Geneid"
+head(merged_genome_GOs)
+
+colnames(merged_files)
+head(merged_files)
+data <-merged_files
+
+if ("Geneid" %in% colnames(data)) {
+  # Replacing ".TU" with "." in the "Geneid" column
+  data$Geneid <- gsub("\\.TU.", ".", data$Geneid)
+  
+  # Replacing "path" with "mrna" in the "Geneid" column
+  data$Geneid <- gsub("path", "mrna", data$Geneid)
+  
+  # Printing the modified data frame
+  head(data)
+} else {
+  cat("Error: 'Geneid' column not found in the data frame.\n")
+}
+merged_files<-data
+
+merge_attempt <- merge(merged_genome_GOs, merged_files, by = "Geneid") 
+
+## I think the issue before was that the text replace code was giving the 
+## merged_files dataframe two ".."'s instead of just one: "."
+
+head(merge_attempt)
+
+## Attempting to merge the GO and Description columns together
+combined_df <- aggregate(cbind(GO, GENENAMES_BP) ~ Geneid + LFC + pvalue + padj + bp, data = merge_attempt, FUN = function(x) paste(unique(x), collapse = "; "))
+str(combined_df)
+combined_df$bp <- as.numeric(combined_df$bp)
+sig_only_combined_df <- subset(combined_df[combined_df$padj < 0.1,])
+sig_only_combined_df <- sig_only_combined_df[complete.cases(sig_only_combined_df),]
+count(unique(combined_df[combined_df$padj < 0.1,]))
+
+## Making a ggplot with this new dataframe...
+ggplot(combined_df, aes(x = bp, y = LFC)) +
   geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
   scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
   labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
@@ -236,10 +444,18 @@ ggplot(sig_only_merged_files, aes(x = bp, y = LFC, color = padj)) +
   geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
   geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
 
-dev.copy(png, file = "Results/Iteration 2/LFC_BP_3rd.png")
-dev.off()
-dev.copy(svg, file = "Results/Iteration 2/LFC_BP_3rd.svg")
-dev.off()
+test <- ggplot(sig_only_combined_df, aes(x = bp, y = LFC, color = padj, text = paste(Geneid))) +
+  geom_point(aes(color = ifelse(padj < 0.1, "Significant", "Non-Significant")), size = 2.5) +
+  scale_color_manual(values = c("Non-Significant" = "purple", "Significant" = "orange")) +
+  labs(x = "Base Pair Position", y = "Log-fold Change", color = "Padj") +
+  scale_x_continuous(limits = c(0,3000000), breaks = seq(0,3000000, by = 500000)) +
+  scale_y_continuous(limits = c(-6,6), breaks = seq(-6,6, by = 1)) +
+  theme_minimal() +
+  geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
+  geom_hline(yintercept = -1, colour = "blue", linetype = "dashed")
+
+test <- ggplotly(test)
+print(test)
 
 
 ggplot(merged_files, aes(x = bp, y = -log10(pvalue), color = LFC)) +
@@ -248,14 +464,11 @@ ggplot(merged_files, aes(x = bp, y = -log10(pvalue), color = LFC)) +
   labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
   theme_minimal()
 
-
-
 ggplot(sig_only_merged_files, aes(x = bp, y = -log10(pvalue), color = LFC)) +
   geom_point(aes(color = ifelse(LFC > 1 | LFC < -1, "Upregulated", "Down-Regulated")), size = 2) +
   scale_color_manual(values = c("Down-Regulated" = "blue", "Upregulated" = "red")) +
   labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
   theme_minimal()
-
 
 ggplot(merged_files, aes(x = bp, y = -log10(pvalue))) +
   geom_point(size = 2) +
@@ -267,8 +480,6 @@ ggplot(merged_files, aes(x = bp, y = -log10(padj))) +
   labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
   theme_minimal()
 
-install.packages("ggrepel")
-library(ggrepel)
 
 GOI_Short <- read.csv("Data/Attempt 2/GOI_Short.csv", header = FALSE)
 GOI_Short <- GOI_Short[-1,]
@@ -282,3 +493,8 @@ ggplot(merged_files, aes(x = bp, y = -log10(padj))) +
   geom_point(aes(color = ifelse(Geneid %in% highlited_names, "DEGs", "Normal")), size = 2) +
   labs(x = "Base Pair Position", y = "-log10(pvalue)", color = "LFC") +
   theme_minimal()
+
+## Merging GENEs and TERMS files for figure data point annotation ----
+GENES_DEG_BP <- read.csv("Data/Attempt 2/GENES_DEG_BP.csv", sep = ",", header = TRUE)
+TERMS_DEG_BP <- read.csv("Data/Attempt 2/TERMs_DEG_BP.csv", sep = ",", header = TRUE)
+MERGED_DEG_BP <- merge(GENES_DEG_BP, TERMS_DEG_BP, by = "GO")
